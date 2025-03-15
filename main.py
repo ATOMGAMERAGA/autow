@@ -22,8 +22,8 @@ def load_version():
 
 # Versiyon bilgisi ve GitHub URL ayarları (URL'leri kendi deponuza göre güncelleyin)
 CURRENT_VERSION = load_version()
-GITHUB_VERSION_URL = "https://raw.githubusercontent.com/YourUsername/YourRepo/main/VERSION.txt"
-GITHUB_MAIN_URL = "https://raw.githubusercontent.com/YourUsername/YourRepo/main/main.py"
+GITHUB_VERSION_URL = "https://raw.githubusercontent.com/ATOMGAMERAGA/autow/main/VERSION.txt"
+GITHUB_MAIN_URL = "https://raw.githubusercontent.com/ATOMGAMERAGA/autow/main/main.py"
 
 # Global değişkenler
 typing_flag = False
