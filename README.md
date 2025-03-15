@@ -1,4 +1,4 @@
-### Auto W (Auto Writer)
+# Auto W (Auto Writer)
 
 ## Linux:
 
