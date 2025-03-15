@@ -1,15 +1,13 @@
 import tkinter as tk
 from tkinter import messagebox
 import threading
-from pynput.keyboard import Controller, Key
-from pynput.mouse import Listener as MouseListener
-import pystray
-from PIL import Image, ImageDraw, ImageTk
+import time
+import pyautogui
 import requests
 import sys
 import os
+from PIL import Image, ImageDraw, ImageTk
 
-# Sürüm bilgisi yükleme fonksiyonu
 def load_version():
     try:
         with open("VERSION.txt", "r", encoding="utf-8") as f:
@@ -21,82 +19,73 @@ CURRENT_VERSION = load_version()
 GITHUB_VERSION_URL = "https://raw.githubusercontent.com/ATOMGAMERAGA/autow/main/VERSION.txt"
 GITHUB_MAIN_URL = "https://raw.githubusercontent.com/ATOMGAMERAGA/autow/main/main.py"
 
-# Global değişkenler
-text_to_type = ""
-keyboard = Controller()
-mouse_listener = None
+typing_flag = False
+typing_thread = None
+assigned_key = None
 
-def on_mouse_click(x, y, button, pressed):
-    """
-    Sol tıklama gerçekleştiğinde, eğer kullanıcı tarafından metin girilmişse
-    bu metni o an odaklı uygulamaya yazar.
-    """
-    # Sadece tıklama basıldığında çalışır.
-    if pressed and button.name == 'left' and text_to_type:
-        for char in text_to_type:
-            keyboard.press(char)
-            keyboard.release(char)
-        # İsteğe bağlı: Yazım sonrası Enter tuşuna basar.
-        keyboard.press(Key.enter)
-        keyboard.release(Key.enter)
+def convert_key(keysym):
+    mapping = {
+        "Return": "enter",
+        "space": "space",
+        "Tab": "tab",
+        "BackSpace": "backspace",
+        "Escape": "esc",
+    }
+    if keysym in mapping:
+        return mapping[keysym]
+    elif len(keysym) == 1:
+        return keysym
+    else:
+        return keysym
 
-def start_auto_typing():
-    """
-    Kullanıcı tarafından girilen metni alır, geçerli bir sayı kontrol eder ve
-    mouse listener'ı başlatır. Ayrıca, uygulama penceresini gizleyerek
-    metnin hedef uygulamaya gönderilmesini sağlar.
-    """
-    global text_to_type, mouse_listener
+def auto_typing(text, interval):
+    global typing_flag, assigned_key
+    time.sleep(1)  # Hedef uygulamaya odaklanmak için bekleme
+    while typing_flag:
+        pyautogui.write(text, interval=0.05)
+        if assigned_key is not None:
+            converted_key = convert_key(assigned_key)
+            try:
+                pyautogui.press(converted_key)
+            except Exception as e:
+                print(f"Tuş gönderilemedi: {e}")
+        time.sleep(interval)
+
+def update_status_label():
+    status = "Aktif" if typing_flag else "Deaktif"
+    label_status.config(text=f"Durum: {status}")
+
+def start_typing():
+    global typing_flag, typing_thread
     text = entry_text.get()
-    if text == "":
-        messagebox.showerror("Hata", "Lütfen yazılacak metni giriniz!")
-        return
-
     try:
-        # Aralık değeri; örneğin iki tıklama arasında bekleme süresi olarak kullanılabilir
         interval = float(entry_interval.get())
     except ValueError:
         messagebox.showerror("Hata", "Lütfen geçerli bir sayı giriniz!")
         return
+    if text == "":
+        messagebox.showerror("Hata", "Lütfen yazılacak metni giriniz!")
+        return
+    if typing_flag:
+        messagebox.showinfo("Bilgi", "Auto Writer zaten çalışıyor!")
+        return
+    typing_flag = True
+    update_status_label()
+    typing_thread = threading.Thread(target=auto_typing, args=(text, interval))
+    typing_thread.daemon = True
+    typing_thread.start()
+    # Ana pencereyi gizlemiyoruz; böylece uygulama açık kalır.
 
-    text_to_type = text
-
-    # Ekran erişim izni gerekliyse, burada kullanıcıya bilgi verilebilir.
-    # Örneğin: "Lütfen bu uygulamaya ekran erişimi izni verin (Sistem Ayarlarından)"
-    messagebox.showinfo("Erişim İzni", "Uygulamanın çalışabilmesi için sisteminizde 'Erişim İzni' verilmiş olmalıdır.")
-
-    # Uygulama penceresini gizleyerek dışarıdaki uygulamalara yazım yapılmasını sağlıyoruz.
-    root.withdraw()
-
-    # Mouse listener'ı başlatıyoruz
-    mouse_listener = MouseListener(on_click=on_mouse_click)
-    mouse_listener.start()
-
-def stop_auto_typing():
-    """
-    Mouse listener'ı durdurur ve uygulama penceresini tekrar gösterir.
-    """
-    global mouse_listener
-    if mouse_listener:
-        mouse_listener.stop()
-        mouse_listener = None
+def stop_typing():
+    global typing_flag, typing_thread
+    typing_flag = False
+    if typing_thread:
+        typing_thread.join(timeout=1)
+    update_status_label()
     messagebox.showinfo("Bilgi", "Auto Writer durduruldu.")
-    root.deiconify()
-
-def exit_app():
-    """
-    Uygulamayı tamamen sonlandırır.
-    """
-    global mouse_listener
-    if mouse_listener:
-        mouse_listener.stop()
-        mouse_listener = None
-    root.destroy()
+    # Pencere zaten açık olduğundan herhangi bir deiconify çağrısı gerekmez.
 
 def create_image():
-    """
-    Tray simgesi için basit bir ikon oluşturur.
-    """
     try:
         image = Image.open("logo.png")
         image = image.resize((64, 64))
@@ -106,23 +95,31 @@ def create_image():
         dc.rectangle((0, 0, 64, 64), fill="blue")
     return image
 
-def show_window(icon, item):
-    root.deiconify()
+def on_closing():
+    global typing_flag, typing_thread
+    typing_flag = False
+    if typing_thread:
+        typing_thread.join(timeout=1)
+    root.destroy()
 
-def quit_from_tray(icon, item):
-    exit_app()
+def capture_key():
+    capture_win = tk.Toplevel(root)
+    capture_win.title("Tuş Ataması")
+    capture_win.geometry("300x100")
+    label = tk.Label(capture_win, text="Lütfen bir tuşa basın...", font=("Helvetica", 12))
+    label.pack(expand=True, pady=20)
+    def key_pressed(event):
+        global assigned_key
+        assigned_key = event.keysym
+        label_assigned.config(text=f"Atanmış Tuş: {assigned_key}")
+        capture_win.destroy()
+    capture_win.bind("<Key>", key_pressed)
+    capture_win.focus_force()
 
-def setup_tray():
-    """
-    Sistem tepsisi (tray) menüsü oluşturur.
-    """
-    image = create_image()
-    menu = pystray.Menu(
-        pystray.MenuItem('Göster', show_window),
-        pystray.MenuItem('Çık', quit_from_tray)
-    )
-    tray_icon = pystray.Icon("AutoTyper", image, "AutoTyper", menu)
-    tray_icon.run()
+def reset_key():
+    global assigned_key
+    assigned_key = None
+    label_assigned.config(text="Atanmış Tuş: Yok")
 
 def check_for_update():
     try:
@@ -168,19 +165,16 @@ def show_info():
         "Uygulama: Auto Writer\n"
         "Geliştirici: Atom Gamer Arda A.G.A\n"
         f"Sürüm: {CURRENT_VERSION}\n"
-        "Bu uygulama, aktif olan uygulamaya otomatik olarak metin yazmak üzere tasarlanmıştır.\n\n"
-        "ÖNEMLİ: Uygulamanın çalışabilmesi için ekran erişim izninin (Accessibility) verilmiş olması gerekmektedir."
+        "Bu uygulama otomatik yazma işlemi için geliştirilmiştir."
     )
     messagebox.showinfo("Uygulama Bilgisi", info_text)
 
-# Tkinter GUI oluşturma
 root = tk.Tk()
 root.title(f"Auto Writer v{CURRENT_VERSION}")
 
 if sys.platform == "darwin":
-    messagebox.showwarning("Uyarı", "macOS'ta çalışabilmesi için sisteminizde 'Accessibility' (Erişim) iznini vermelisiniz.")
+    messagebox.showwarning("Uyarı", "Bu uygulama macOS'ta düzgün çalışmayabilir.")
 
-# Logo ekleme
 try:
     logo_image = Image.open("logo.png")
     logo_image = logo_image.resize((200, 200))
@@ -196,43 +190,50 @@ label_text.pack(padx=10, pady=5)
 entry_text = tk.Entry(root, width=50, font=("Helvetica", 12))
 entry_text.pack(padx=10, pady=5)
 
-label_interval = tk.Label(root, text="Tıklamalar arası bekleme süresi (saniye):", font=("Helvetica", 12))
+label_interval = tk.Label(root, text="Kaç saniyede bir (saniye):", font=("Helvetica", 12))
 label_interval.pack(padx=10, pady=5)
 
 entry_interval = tk.Entry(root, width=20, font=("Helvetica", 12))
 entry_interval.pack(padx=10, pady=5)
 
-frame_buttons = tk.Frame(root)
-frame_buttons.pack(padx=10, pady=10)
+label_status = tk.Label(root, text="Durum: Deaktif", font=("Helvetica", 12, "bold"))
+label_status.pack(padx=10, pady=5)
 
-button_start = tk.Button(frame_buttons, text="Başlat", command=start_auto_typing,
+frame_key = tk.Frame(root)
+frame_key.pack(padx=10, pady=10)
+
+label_assigned = tk.Label(frame_key, text="Atanmış Tuş: Yok", font=("Helvetica", 12))
+label_assigned.grid(row=0, column=0, columnspan=2, pady=(0, 5))
+
+button_set_key = tk.Button(frame_key, text="Tuş Ata", command=capture_key,
+                           bg="#2196F3", fg="white", font=("Helvetica", 12, "bold"),
+                           relief=tk.RAISED, bd=3, width=10)
+button_set_key.grid(row=1, column=0, padx=5, pady=5)
+
+button_reset_key = tk.Button(frame_key, text="Tuşu Sıfırla", command=reset_key,
+                             bg="#FF9800", fg="white", font=("Helvetica", 12, "bold"),
+                             relief=tk.RAISED, bd=3, width=10)
+button_reset_key.grid(row=1, column=1, padx=5, pady=5)
+
+button_start = tk.Button(root, text="Başlat", command=start_typing,
                          bg="#4CAF50", fg="white", font=("Helvetica", 12, "bold"),
-                         relief=tk.RAISED, bd=3, width=10)
-button_start.grid(row=0, column=0, padx=5, pady=5)
+                         relief=tk.RAISED, bd=3, width=15)
+button_start.pack(padx=10, pady=5)
 
-button_stop = tk.Button(frame_buttons, text="Durdur", command=stop_auto_typing,
+button_stop = tk.Button(root, text="Durdur", command=stop_typing,
                         bg="#f44336", fg="white", font=("Helvetica", 12, "bold"),
-                        relief=tk.RAISED, bd=3, width=10)
-button_stop.grid(row=0, column=1, padx=5, pady=5)
-
-button_update = tk.Button(frame_buttons, text="Güncelle", command=update_app,
-                          bg="#9C27B0", fg="white", font=("Helvetica", 12, "bold"),
-                          relief=tk.RAISED, bd=3, width=10)
-button_update.grid(row=1, column=0, padx=5, pady=5)
-
-button_info = tk.Button(frame_buttons, text="Bilgi", command=show_info,
-                        bg="#607D8B", fg="white", font=("Helvetica", 12, "bold"),
-                        relief=tk.RAISED, bd=3, width=10)
-button_info.grid(row=1, column=1, padx=5, pady=5)
-
-button_exit = tk.Button(root, text="Çık", command=exit_app,
-                        bg="#000000", fg="white", font=("Helvetica", 12, "bold"),
                         relief=tk.RAISED, bd=3, width=15)
-button_exit.pack(padx=10, pady=5)
+button_stop.pack(padx=10, pady=5)
 
-# Tray (sistem tepsisi) işlemi ayrı bir iş parçacığında çalıştırılır.
-tray_thread = threading.Thread(target=setup_tray)
-tray_thread.daemon = True
-tray_thread.start()
+button_update = tk.Button(root, text="Güncelle", command=update_app,
+                          bg="#9C27B0", fg="white", font=("Helvetica", 12, "bold"),
+                          relief=tk.RAISED, bd=3, width=15)
+button_update.pack(padx=10, pady=5)
 
+button_info = tk.Button(root, text="Bilgi", command=show_info,
+                        bg="#607D8B", fg="white", font=("Helvetica", 12, "bold"),
+                        relief=tk.RAISED, bd=3, width=15)
+button_info.pack(padx=10, pady=5)
+
+root.protocol("WM_DELETE_WINDOW", on_closing)
 root.mainloop()
