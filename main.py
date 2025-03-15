@@ -246,14 +246,19 @@ def check_for_update():
                 if main_response.status_code != 200:
                     messagebox.showerror("Güncelleme Hatası", f"Yeni sürüm indirilemedi: HTTP {main_response.status_code}")
                     return
+                # main.py dosyasını güncelle
                 with open(sys.argv[0], "w", encoding="utf-8") as f:
                     f.write(main_response.text)
+                # VERSION.txt dosyasını da güncelle
+                with open("VERSION.txt", "w", encoding="utf-8") as f:
+                    f.write(remote_version)
                 messagebox.showinfo("Güncelleme", "Güncelleme tamamlandı.\nLütfen uygulamayı yeniden başlatın.")
                 os._exit(0)
             except Exception as e:
                 messagebox.showerror("Güncelleme Hatası", f"Güncelleme yapılamadı: {e}")
     else:
         messagebox.showinfo("Güncelleme", "Uygulamanız güncel.")
+
 
 def update_app():
     """
