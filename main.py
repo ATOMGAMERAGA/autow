@@ -95,7 +95,7 @@ def start_typing():
         messagebox.showerror("Hata", "Lütfen yazılacak metni giriniz!")
         return
     if typing_flag:
-        messagebox.showinfo("Bilgi", "Auto Typer zaten çalışıyor!")
+        messagebox.showinfo("Bilgi", "Auto Writer zaten çalışıyor!")
         return
     typing_flag = True
     update_status_label()
@@ -113,7 +113,7 @@ def stop_typing():
     if typing_thread:
         typing_thread.join(timeout=1)
     update_status_label()
-    messagebox.showinfo("Bilgi", "Auto Typer durduruldu.")
+    messagebox.showinfo("Bilgi", "Auto Writer durduruldu.")
 
 def create_image():
     """
@@ -266,8 +266,8 @@ def show_info():
     "Bilgi" butonuna tıklandığında uygulama bilgilerini gösterir.
     """
     info_text = (
-        "Uygulama: Auto Typer\n"
-        "Geliştirici: btlab\n"
+        "Uygulama: Auto Writer\n"
+        "Geliştirici: Atom Gamer Arda A.G.A\n"
         f"Sürüm: {CURRENT_VERSION}\n"
         "Bu uygulama otomatik yazma işlemi için geliştirilmiştir."
     )
@@ -275,7 +275,7 @@ def show_info():
 
 # Tkinter GUI oluşturma
 root = tk.Tk()
-root.title(f"Auto Typer v{CURRENT_VERSION}")
+root.title(f"Auto Writer v{CURRENT_VERSION}")
 
 # Eğer işletim sistemi macOS ise uyarı göster
 if sys.platform == "darwin":
