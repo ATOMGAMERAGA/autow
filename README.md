@@ -17,7 +17,7 @@ Sanal Ortamı Aktif Etme:
  source myenv/bin/activate
 
 Gerekli Modül:
- pip install pynput pystray pillow requests
+ pip install pynput pystray pillow requests pyautogui
 
 
 
