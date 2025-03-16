@@ -6,7 +6,7 @@ Kurmak için relases bölümünden en son versiyonun bütün kodunu yükleyin ve
 
 ## Windows:
 
-Kurmak için relases bölümünden en son versiyonun bütün kodunu yükleyin ve dosyaya çıkarın zip dosyasını , ardından bilgisayarınıza en son pythonu [buraya tıklayarak](https://www.python.org/ftp/python/3.13.2/python-3.13.2-amd64.exe) yükleyin sonra yukardaki dosya konum yerine yıklayıp herşeyi silip "cmd" yazıp enter tuşuna basın açılan yere gerekli modülleri yükleyin komutunu koyun ve herşey bitince "python main.py" yazın.
+Kurmak için relases bölümünden en son versiyonun bütün kodunu yükleyin ve dosyaya çıkarın zip dosyasını , ardından bilgisayarınıza en son pythonu [buraya tıklayarak](https://www.python.org/ftp/python/3.13.2/python-3.13.2-amd64.exe) yükleyin sonra yukardaki dosya konum yerine tıklayıp herşeyi silip "cmd" yazıp enter tuşuna basın açılan yere gerekli modülleri yükleyin ancak yan mödül olan tkinterı siz "pip install tk" komutuyla indirin ve herşey bitince "python main.py" yazın.
 
 ## Komutlar:
 
