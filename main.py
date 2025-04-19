@@ -14,15 +14,15 @@ import sv_ttk  # Sun Valley tema kütüphanesi
 
 def load_version():
     try:
-        with open("VERSION.txt", "r", encoding="utf-8") as f:
+        with open("VERSION.json", "r", encoding="utf-8") as f:
             return f.read().strip()
     except Exception:
         return "0.0.0"
 
 CURRENT_VERSION = load_version()
-GITHUB_VERSION_URL = "https://raw.githubusercontent.com/ATOMGAMERAGA/autow/main/VERSION.txt"
+GITHUB_VERSION_URL = "https://raw.githubusercontent.com/ATOMGAMERAGA/autow/main/VERSION.json"
 GITHUB_MAIN_URL = "https://raw.githubusercontent.com/ATOMGAMERAGA/autow/main/main.py"
-GITHUB_LOGO_URL = "https://raw.githubusercontent.com/ATOMGAMERAGA/autow/main/logo.png"
+GITHUB_LOGO_URL = "https://raw.githubusercontent.com/ATOMGAMERAGA/autow/main/logos/logo.png"
 typing_flag = False
 typing_thread = None
 assigned_key = None
@@ -89,7 +89,7 @@ def stop_typing():
 
 def create_image():
     try:
-        image = Image.open("logo.png")
+        image = Image.open("logos/logo.png")
         image = image.resize((64, 64))
     except Exception:
         image = Image.new('RGB', (64, 64), "white")
@@ -150,7 +150,7 @@ def check_for_update():
                     return
                 with open(sys.argv[0], "w", encoding="utf-8") as f:
                     f.write(main_response.text)
-                with open("VERSION.txt", "w", encoding="utf-8") as f:
+                with open("VERSION.json", "w", encoding="utf-8") as f:
                     f.write(remote_version)
                 messagebox.showinfo("Güncelleme", "Güncelleme tamamlandı.\nLütfen uygulamayı yeniden başlatın.")
                 os._exit(0)
@@ -187,7 +187,7 @@ if sys.platform == "darwin":
 
 # Logo yükleme
 try:
-    logo_image = Image.open("logo.png")
+    logo_image = Image.open("logos/logo.png")
     logo_image = logo_image.resize((200, 200))
     logo_photo = ImageTk.PhotoImage(logo_image)
     label_logo = ttk.Label(root, image=logo_photo)
