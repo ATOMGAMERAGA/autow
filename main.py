@@ -22,6 +22,7 @@ CURRENT_VERSION = load_version()
 GITHUB_VERSION_URL = "https://raw.githubusercontent.com/ATOMGAMERAGA/autow/main/VERSION.json"
 GITHUB_MAIN_URL = "https://raw.githubusercontent.com/ATOMGAMERAGA/autow/main/main.py"
 GITHUB_LOGO_URL = "https://raw.githubusercontent.com/ATOMGAMERAGA/autow/main/logos/logo.png"
+
 typing_thread = None
 typing_flag = False
 assigned_key = None
@@ -42,7 +43,6 @@ def convert_key(keysym):
         return keysym
 
 def auto_typing(text, interval):
-    global typing_flag, assigned_key
     time.sleep(1)  # Hedef uygulamaya odaklanmak için bekleme
     while typing_flag:
         pyautogui.write(text, interval=0.05)
@@ -97,7 +97,7 @@ def create_image():
     return image
 
 def on_closing():
-    global typing_flag, typing_thread
+    global typing_flag
     typing_flag = False
     if typing_thread:
         typing_thread.join(timeout=1)
