@@ -1,1 +1,6 @@
-pynput pystray pillow requests pyautogui sv-ttk
+pynput 
+pystray 
+pillow 
+requests 
+pyautogui 
+sv-ttk
