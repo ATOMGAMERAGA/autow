@@ -79,7 +79,7 @@ def start_typing():
     typing_thread.start()
 
 def stop_typing():
-    global typing_flag, typing_thread
+    global typing_flag
     typing_flag = False
     if typing_thread:
         typing_thread.join(timeout=1)
