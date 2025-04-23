@@ -1,4 +1,5 @@
-# Autow (Auto Writer) App
+
+# Autow (Auto Writer Unstable v.) App
 
 import tkinter as tk
 from tkinter import ttk, messagebox
