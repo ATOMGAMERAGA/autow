@@ -1,4 +1,3 @@
-
 # Autow (Auto Writer) App
 
 import tkinter as tk
@@ -121,7 +120,7 @@ def capture_key():
 def reset_key():
     global assigned_key
     assigned_key = None
-    label_assigned.config(text="Atanmış Tuş: Yok!")
+    label_assigned.config(text="Atanmış Tuş: Yok")
 
 def check_for_update():
     try:
