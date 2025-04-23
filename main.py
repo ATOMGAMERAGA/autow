@@ -23,7 +23,6 @@ CURRENT_VERSION = load_version()
 GITHUB_VERSION_URL = "https://raw.githubusercontent.com/ATOMGAMERAGA/autow/main/VERSION.json"
 GITHUB_MAIN_URL = "https://raw.githubusercontent.com/ATOMGAMERAGA/autow/main/main.py"
 GITHUB_LOGO_URL = "https://raw.githubusercontent.com/ATOMGAMERAGA/autow/main/logos/logo.png"
-typing_flag = False
 typing_thread = None
 assigned_key = None
 
