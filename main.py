@@ -24,6 +24,7 @@ GITHUB_VERSION_URL = "https://raw.githubusercontent.com/ATOMGAMERAGA/autow/main/
 GITHUB_MAIN_URL = "https://raw.githubusercontent.com/ATOMGAMERAGA/autow/main/main.py"
 GITHUB_LOGO_URL = "https://raw.githubusercontent.com/ATOMGAMERAGA/autow/main/logos/logo.png"
 typing_thread = None
+typing_flag = False
 assigned_key = None
 
 def convert_key(keysym):
