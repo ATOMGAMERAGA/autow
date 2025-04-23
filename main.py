@@ -43,7 +43,6 @@ def convert_key(keysym):
         return keysym
 
 def auto_typing(text, interval):
-    global assigned_key
     time.sleep(1)  # Hedef uygulamaya odaklanmak için bekleme
     while typing_flag:
         pyautogui.write(text, interval=0.05)
