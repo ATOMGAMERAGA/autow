@@ -59,7 +59,6 @@ def update_status_label():
     label_status.config(text=f"Durum: {status}")
 
 def start_typing():
-    global typing_flag, typing_thread
     text = entry_text.get()
     try:
         interval = float(entry_interval.get())
@@ -79,7 +78,6 @@ def start_typing():
     typing_thread.start()
 
 def stop_typing():
-    global typing_flag, typing_thread
     typing_flag = False
     if typing_thread:
         typing_thread.join(timeout=1)
@@ -97,7 +95,6 @@ def create_image():
     return image
 
 def on_closing():
-    global typing_flag, typing_thread
     typing_flag = False
     if typing_thread:
         typing_thread.join(timeout=1)
